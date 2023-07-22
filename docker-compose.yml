@@ -2,7 +2,7 @@ version: "3.9"
 services:
   influxdb:
     image: "influxdb:${INFLUXDB_IMAGE_TAG}"
-    container_name: influxdb
+    container_name: grafana-influxdb
     expose:
       - 8086
     volumes:
@@ -17,7 +17,7 @@ services:
   speedtest-grafana:
     build: .
     image: speedtest-grafana:0.0.2
-    container_name: speedtest-grafana
+    container_name: grafana-speedtest
     depends_on:
       - influxdb
     environment:
@@ -29,8 +29,8 @@ services:
       - "INFLUXDB_USER=${INFLUXDB_USER}"
       - "INFLUXDB_USER_PASSWORD=${INFLUXDB_USER_PASSWORD}"
   grafana:
-    image: grafana/grafana:7.3.7
-    container_name: grafana
+    image: grafana/grafana:latest
+    container_name: grafana-dashboard
     ports:
       - 3000:3000
     volumes:
