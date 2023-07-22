@@ -5,7 +5,6 @@ Use [Grafana](https://grafana.com/), [InfluxDB](https://www.influxdata.com/produ
 ## Prerequisites
 
 1. Docker
-
 2. docker-compose
 
 ## Usage
@@ -14,15 +13,8 @@ Use [Grafana](https://grafana.com/), [InfluxDB](https://www.influxdata.com/produ
 >
 > Make sure you run the commands below from the project directory.
 
-1. Build the speedtest-grafana container image using the command: `docker-compose build`
-
-2. Set the `SPEEDTEST_SERVER_ID` environment variable located in the [.env](.env) file to the server ID to perform speedtests against.
-
-    > [!NOTE]
-    >
-    > If you don't know any server IDs, run the following command and they will be shown: `docker run --rm -it speedtest-grafana:0.0.2 /librespeed --list`
-
-3. Modify any other environment variables located in the [.env](.env) file.
+1. Build the speedtest-grafana container image using the command: `docker compose build`
+2. Modify any other environment variables located in the [.env](.env) file.
 
     > [!WARNING]
     >
@@ -41,9 +33,8 @@ Use [Grafana](https://grafana.com/), [InfluxDB](https://www.influxdata.com/produ
     >
     > If you intend to run this project on a Raspberry Pi, make sure you alter the `INFLUXDB_IMAGE_TAG` to `1.8.3`.
 
-4. Start the containers using the command: `docker-compose up -d`
-
-5. Access Grafana at [`http://localhost:3000`](http://localhost:3000)
+3. Start the containers using the command: `docker compose up -d`
+4. Access Grafana at [`http://localhost:3000`](http://localhost:3000)
 
     > [!NOTE]
     >
