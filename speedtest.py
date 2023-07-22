@@ -34,22 +34,15 @@ logger.debug(f"Starting speedtest-grafana version: {__version__}.")
 
 # Retrieve environment variables
 # If not found, use defaults
-SPEEDTEST_INTERVAL = int(os.environ.get("SPEEDTEST_INTERVAL", 300))  # 5 minutes
-SPEEDTEST_SERVER_ID = os.environ.get("SPEEDTEST_SERVER_ID", None)
+
 INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "influxdb")
 INFLUXDB_PORT = int(os.environ.get("INFLUXDB_PORT", 8086))
 INFLUXDB_USER = os.environ.get("INFLUXDB_USER", "root")
 INFLUXDB_USER_PASSWORD = os.environ.get("INFLUXDB_USER_PASSWORD", "root")
 INFLUXDB_DB = os.environ.get("INFLUXDB_DB", "internet_speed")
 
-# Check if SPEEDTEST_SERVER_ID environment variable has not been provided
-if not SPEEDTEST_SERVER_ID:
-    logger.debug(
-        "SPEEDTEST_SERVER_ID environment variable has no server ID. Choose from the list below and set the environment variable."
-    )
-    servers = subprocess.run(["/librespeed", "--list"], capture_output=True, text=True)
-    logger.debug(servers.stdout)
-    exit()
+# Default interval is 30 minutes (30 x 60s)
+SPEEDTEST_INTERVAL = int(os.environ.get("SPEEDTEST_INTERVAL", 1800))
 
 # Connect to InfluxDB
 logger.debug(
@@ -65,15 +58,15 @@ influx = influxdb.InfluxDBClient(
 )
 
 # Run the speedtest using the librespeed/speedtest-cli on an interval
+# remove --server parameter, since server selection automated by ping based    
 while True:
     logger.debug(
-        f"Running speedtest with server ID: {SPEEDTEST_SERVER_ID} and telemetry disabled."
+        f"Running speedtest with auto server selection based on ping and telemetry disabled."
     )
+        
     result = subprocess.run(
         [
             "/librespeed",
-            "--server",
-            SPEEDTEST_SERVER_ID,
             "--telemetry-level",
             "disabled",
             "--json",
@@ -105,24 +98,24 @@ while True:
             {
                 "measurement": "internet_speed",
                 "tags": {
-                    "server_name": json_result["server"]["name"],
-                    "server_url": json_result["server"]["url"],
-                    "ip": json_result["client"]["ip"],
-                    "hostname": json_result["client"]["hostname"],
-                    "region": json_result["client"]["region"],
-                    "city": json_result["client"]["city"],
-                    "country": json_result["client"]["country"],
-                    "org": json_result["client"]["org"],
-                    "timezone": json_result["client"]["timezone"],
+                    "server_name": json_result[0]["server"]["name"],
+                    "server_url": json_result[0]["server"]["url"],
+                    "ip": json_result[0]["client"]["ip"],
+                    "hostname": json_result[0]["client"]["hostname"],
+                    "region": json_result[0]["client"]["region"],
+                    "city": json_result[0]["client"]["city"],
+                    "country": json_result[0]["client"]["country"],
+                    "org": json_result[0]["client"]["org"],
+                    "timezone": json_result[0]["client"]["timezone"],
                 },
-                "time": json_result["timestamp"],
+                "time": json_result[0]["timestamp"],
                 "fields": {
-                    "bytes_sent": json_result["bytes_sent"],
-                    "bytes_received": json_result["bytes_received"],
-                    "ping": float(json_result["ping"]),
-                    "jitter": float(json_result["jitter"]),
-                    "upload": float(json_result["upload"]),
-                    "download": float(json_result["download"]),
+                    "bytes_sent": json_result[0]["bytes_sent"],
+                    "bytes_received": json_result[0]["bytes_received"],
+                    "ping": float(json_result[0]["ping"]),
+                    "jitter": float(json_result[0]["jitter"]),
+                    "upload": float(json_result[0]["upload"]),
+                    "download": float(json_result[0]["download"]),
                 },
             }
         ]
